@@ -1,0 +1,16 @@
+# Sourced by the other bin/ scripts.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# PipeWire clients find their socket through XDG_RUNTIME_DIR; some shells lack it.
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+# Overtone wants a modern JDK; prefer the system default over an older java on PATH.
+if [ -z "${JAVA_CMD:-}" ] && [ -x /usr/lib/jvm/default-java/bin/java ]; then
+  export JAVA_CMD=/usr/lib/jvm/default-java/bin/java
+fi
+
+# Run the JVM on PipeWire's JACK so Overtone can wire scsynth to the speakers.
+WRAP=()
+if command -v pw-jack >/dev/null && pgrep -x pipewire >/dev/null; then
+  WRAP=(pw-jack)
+fi

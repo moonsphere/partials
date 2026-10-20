@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Claude can't hear, so it looks: spectrogram PNG + level stats for a render.
+#   bin/look out/op00-tuning.wav [max-hz]   ->  out/op00-tuning.png
+set -euo pipefail
+wav=${1:?usage: bin/look out/<piece>.wav [max-hz]}
+png=${wav%.wav}.png
+max=${2:-4000}  # Hz; the spectrogram spans 0..max Hz, linear, lower max = finer pitch detail
+ffmpeg -v error -y -i "$wav" \
+  -lavfi "aresample=$((2 * max)),showspectrumpic=s=1600x800:fscale=lin:start=0:stop=$max:drange=90" "$png"
+ffmpeg -hide_banner -nostats -i "$wav" \
+  -af "astats=measure_perchannel=none:measure_overall=Peak_level+RMS_level" -f null - 2>&1 |
+  grep -E 'Duration|Peak level|RMS level' | sed 's/^\[[^]]*\] *//; s/^ *//'
+echo "spectrogram: $png"

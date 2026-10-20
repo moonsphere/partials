@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Start a headless nREPL in partials.studio; bin/eval talks to it.
+set -euo pipefail
+source "$(dirname "$0")/env"
+cd "$ROOT"
+exec "${WRAP[@]}" lein repl :headless :port "${NREPL_PORT:-7888}"

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Render pieces to out/<name>.wav:  bin/render op00 [op01 ...]
+# Uses the running REPL (bin/repl) when there is one, else a fresh JVM.
+set -euo pipefail
+source "$(dirname "$0")/env"
+cd "$ROOT"
+[ $# -gt 0 ] || { echo "usage: bin/render op00 [op01 ...]" >&2; exit 2; }
+if [ -f .nrepl-port ] && nc -z localhost "$(cat .nrepl-port)" 2>/dev/null; then
+  for id in "$@"; do bin/eval "(render! '$id)"; done
+else
+  "${WRAP[@]}" lein render "$@"
+fi
